@@ -1,0 +1,69 @@
+Function Get-Telnet
+{   Param (
+        [Parameter(ValueFromPipeline=$true)]
+        [String[]]$Commands = @("username","password","disable clipaging","sh config"),
+        [string]$RemoteHost = "HostnameOrIPAddress",
+        [string]$Port = "23",
+        [int]$WaitTime = 1000,
+        [string]$OutputPath = "\\server\share\switchbackup.txt"
+    )
+    $Socket = New-Object System.Net.Sockets.TcpClient($RemoteHost, $Port)
+    If ($Socket)
+    {   $Stream = $Socket.GetStream()
+        $Writer = New-Object System.IO.StreamWriter($Stream)
+        $Buffer = New-Object System.Byte[] 1024 
+        $Encoding = New-Object System.Text.AsciiEncoding
+r
+        #Now start issuing the commands
+        ForEach ($Command in $Commands)
+        {   $Writer.WriteLine($Command) 
+            $Writer.Flush()
+            Start-Sleep -Milliseconds $WaitTime
+        } 
+        Start-Sleep -Milliseconds ($WaitTime * 4)
+        $Result = ""
+        While($Stream.DataAvailable) 
+        {   $Read = $Stream.Read($Buffer, 0, 1024) 
+            $Result += ($Encoding.GetString($Buffer, 0, $Read))
+        }
+    }
+    Else     
+    {   $Result = "Unable to connect to host: $($RemoteHost):$Port"
+    }
+    $Result | Out-File $OutputPath
+}
+
+$myarray='172.28.64.194','172.28.64.195','172.28.64.196','172.28.64.197'
+for ($z=1; $z -le $myarray.Length;$z++)
+{
+$hostname=$myarray[$z-1]
+$DayDate = Get-Date -Format ddMMyyy
+$DayTime = Get-Date -Format t
+Get-Telnet -RemoteHost "$hostname" -Commands "ciscouser","cisco.123","show sip-ua call summary","show run | i hostna","exit"  -OutputPath "D:\SIP Call\$hostname.txt"
+$a=Get-Content -Path "D:\SIP Call\$hostname.txt" | Select-String "Total SIP call"
+$e=Get-Content -Path "D:\SIP Call\$hostname.txt" | Select-String "hostname"
+$b=$a -replace "Total SIP call legs:",""
+$c=$b -replace " User Agent Client:",""
+$d=$c -replace " User Agent Server:",""
+$hname=$e -replace "hostname",""
+$FileName="D:\SIP Call\$hname.txt_$DayDate.txt"
+$Header="Time,Total SIP CON,User Agent Client, User Agent Server"
+$Report = "$DayTime,$d"
+If (Test-Path "$FileName")
+{
+$val=Get-Content -Path $FileName
+If ($val -contains $Header)
+{
+$Report>>$FileName
+}
+Else
+{
+$Header,$Report >>$FileName
+}
+}
+else
+{
+New-Item $FileName -type File
+$Header,$Report >>$FileName
+}
+}
