@@ -33,13 +33,13 @@ r
     $Result | Out-File $OutputPath
 }
 
-$myarray='172.28.64.194','172.28.64.195','172.28.64.196','172.28.64.197'
+$myarray='IPAddress1','IPAddress2','IPAddress3','IPAddress4'
 for ($z=1; $z -le $myarray.Length;$z++)
 {
 $hostname=$myarray[$z-1]
 $DayDate = Get-Date -Format ddMMyyy
 $DayTime = Get-Date -Format t
-Get-Telnet -RemoteHost "$hostname" -Commands "ciscouser","cisco.123","show sip-ua call summary","show run | i hostna","exit"  -OutputPath "D:\SIP Call\$hostname.txt"
+Get-Telnet -RemoteHost "$hostname" -Commands "username","password","show sip-ua call summary","show run | i hostna","exit"  -OutputPath "D:\SIP Call\$hostname.txt"
 $a=Get-Content -Path "D:\SIP Call\$hostname.txt" | Select-String "Total SIP call"
 $e=Get-Content -Path "D:\SIP Call\$hostname.txt" | Select-String "hostname"
 $b=$a -replace "Total SIP call legs:",""
