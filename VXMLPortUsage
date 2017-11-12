@@ -1,0 +1,28 @@
+cd C:\Cisco\CVP\VXMLServer\admin
+.\ReportScript.bat //run status.bat refer to below batch script
+$a=type D:\Script\a.txt | find "Available Ports"
+$b=$a -replace "Available Ports:",""
+$c=type D:\Script\a.txt | find "License Ports"
+$d=$c -replace "License Ports:",""
+$PortAva=$b.Trim()
+$PortLicense=$d.Trim()
+$PortUsed = $PortLicense-$PortAva
+$Date = Get-Date -Format g
+$DayDate = Get-Date -Format ddMMyyy
+$DayTime = Get-Date -Format t
+$FileName="D:\Script\CVP_Port_$DayDate.csv"
+$Header="Time,Total License,Port Used,Port Available"
+$Report = "$DayTime,$PortLicense,$PortUsed,$PortAva" 
+If (Test-Path "$FileName")
+{
+$Report>>$FileName
+}
+Else
+{
+New-Item $FileName -Type File
+$Header,$Report >>$FileName
+}
+
+
+##ReportScript.bat
+echo.|C:\Cisco\CVP\VXMLServer\admin\status.bat >D:\Script\a.txt
