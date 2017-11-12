@@ -1,0 +1,24 @@
+##Enable xp_cmdshell
+
+-- To allow advanced options to be changed.  
+EXEC sp_configure 'show advanced options', 1;  
+GO  
+-- To update the currently configured value for advanced options.  
+RECONFIGURE;  //Sometimes warnig will showing and need to change to RECONFIGURE OVERIDE
+GO  
+-- To enable the feature.  
+EXEC sp_configure 'xp_cmdshell', 1;  
+GO  
+-- To update the currently configured value for this feature.  
+RECONFIGURE;  //Sometimes warnig will showing and need to change to RECONFIGURE OVERIDE
+GO  
+
+########Execute Backup
+
+EXEC xp_cmdshell 'net use Y: \\10.194.194.111\backup_log_ipcc password /USER:username /PERSISTENT:yes';  
+GO  
+###
+Paste SQL Query backup here
+###
+EXEC xp_cmdshell 'net use Y: /delete';  
+GO  
