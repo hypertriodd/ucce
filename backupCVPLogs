@@ -1,0 +1,12 @@
+cd C:\Cisco\CVP\VXMLServer //Go to CVP Main Directory
+$direc=Get-ChildItem -Path "applications"  //Capture All CVP VXML application folder
+##Loop process
+foreach ($direc in $direc){
+CD applications\$direc\
+$p = Split-Path -leaf -path (Get-Location)
+$dest='Y:\Backup CVP\CVP1\' +$p +'\'  //Backup Destination
+mkdir -force $dest
+cd logs\ActivityLog
+Move-Item  *.txt $dest -ErrorAction continue
+CD C:\Cisco\CVP\VXMLServer\
+}
